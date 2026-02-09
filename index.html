@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Happy Anniversary</title>
+<link rel="stylesheet" href="mobile.css" media="screen and (max-width: 768px)">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  background: linear-gradient(120deg, #fdeff9, #ecf3ff);
+  font-family: "Hiragino Mincho ProN", serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+#container {
+  text-align: center;
+  position: relative;
+  width: 100%;
+}
+
+#title {
+  font-size: 38px;
+  letter-spacing: 2px;
+  margin-bottom: 24px;
+  background: linear-gradient(120deg, #f7d774, #f5b942, #fff1b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 8px rgba(255, 220, 120, 0.6);
+  animation: glow 3s ease-in-out infinite;
+  transition: opacity 2s;
+  pointer-events: none;
+}
+
+#subtitle {
+  font-size: 14px;
+  margin-top: 6px;
+  letter-spacing: 1px;
+  color: #c9a94a;
+}
+
+@keyframes glow {
+  0% { text-shadow: 0 0 6px rgba(255,220,120,0.4); }
+  50% { text-shadow: 0 0 16px rgba(255,220,120,0.9); }
+  100% { text-shadow: 0 0 6px rgba(255,220,120,0.4); }
+}
+
+button {
+  padding: 14px 42px;
+  font-size: 17px;
+  border: none;
+  border-radius: 30px;
+  background: #ff9fbf;
+  color: white;
+  cursor: pointer;
+  position: relative;
+  z-index: 10;
+  margin-top: 16px;
+}
+
+#message {
+  margin-top: 220px;
+  font-size: 20px;
+  color: #555;
+  opacity: 0;
+  transition: opacity 1.5s;
+  line-height: 1.6;
+  position: relative;
+  z-index: 5;
+}
+
+#finalMessage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 40px;
+  font-weight: bold;
+  color: #ff3366;
+  background: linear-gradient(120deg, #ffccdd, #ff99bb);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 16px rgba(255, 102, 153, 0.8);
+  opacity: 0;
+  transition: opacity 2s;
+  letter-spacing: 1px;
+  z-index: 10;
+}
+
+/* 再開ボタン（右下アイコン） */
+#restartBtn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  z-index: 20;
+  display: none;
+  opacity: 0;
+  transition: opacity 1s, transform 0.3s;
+}
+
+#restartBtn img {
+  width: 100%;
+  height: 100%;
+}
+
+#restartBtn:hover {
+  transform: scale(1.1);
+}
+</style>
+</head>
+<body>
+
+<div id="container">
+  <h1 id="title">
+    Happy Anniversary
+    <div id="subtitle">1st Anniversary</div>
+  </h1>
+
+  <button id="yesBtn">想いをひらく</button>
+
+  <div id="message"></div>
+  <div id="finalMessage"></div>
+
+  <!-- 再開ボタン -->
+  <button id="restartBtn" title="再開">
+    <img src="restart.jpg" alt="再開">
+  </button>
+</div>
+
+<audio id="bgm" src="bgm.mp3" autoplay loop></audio>
+
+<script>
+const yesBtn = document.getElementById("yesBtn");
+const message = document.getElementById("message");
+const finalMessage = document.getElementById("finalMessage");
+const restartBtn = document.getElementById("restartBtn");
+const bgm = document.getElementById("bgm");
+
+let used = false;
+let msgIndex = 0;
+let photoInterval = null;
+
+const messages = [
+  "သဲ ❤️",
+  "တွေ့ခဲ့တဲ့နေ့ကနေ ယနေ့အထိ",
+  "သဲနဲ့အတူဖြတ်သန်းခဲ့တဲ့ အချိန်တွေ ကိုကိုအတွက် တန်ဖိုးကြီးတဲ့ အမှတ်တရတွေ ဖြစ်ခဲ့ပါတယ်။",
+  "ရယ်ခဲ့ရတဲ့ရက်တွေအတွက်လည်းအရမ်းပျော်သလို ငိုခဲ့ရတဲ့ရက်တွေအတွက်လည်းတောင်းပန်ပါတယ်",
+  "ကိုကိုက စိတ်ထဲတခုခုထင့်ရင်ဖစ်ဖစ်စိတ်ခုသွားရင်ဖစ်ဖစ်မျက်နှာက ရီမရပဲတည်တဲ့အချိန် သဲစိတ်ညစ်သွားတဲ့အတွက်လည်းတောင်းပန်ပါတယ်",
+  "အားလုံးကို သဲနဲ့အတူ လက်တွဲဖြတ်သန်းနိုင်မယ်လို့လဲယံုကြည်ပါတယ်",
+  "ဒီ ၁နှစ်တာအတွင်း သဲရဲ့ ချစ်ခြင်းမေတ္တာ၊ နားလည်မှုနဲ့ အားပေးမှုတွေကို ကိုကို အဆုံးမဲ့ ကျေးဇူးတင်ပါတယ်။",
+  "အနာဂတ်မှာလည်း သဲနဲ့အတူ လက်တွဲပြီး ပျော်ရွှင်မှုတွေ၊ အမှတ်တရတွေကိုပိုပြီး ဖန်တီးသွားချင်ပါတယ်။",
+  "Happy 1st Anniversary ❤️",
+  "ကိုကို အမြဲ သဲဘက်မှာပဲ ရှိနေမှာပါ…"
+];
+
+
+// photo1.jpg ～ photo56.jpg を配列に自動生成
+const images = [];
+for (let i = 1; i <= 56; i++) images.push(`photo${i}.jpg`);
+
+// 初回開始
+yesBtn.onclick = () => startAnimation();
+
+// 再開ボタン
+restartBtn.onclick = () => startAnimation(true);
+
+function startAnimation(isRestart = false) {
+  if (!isRestart && used) return;
+  used = true;
+  msgIndex = 0;
+
+  // リセット
+  message.style.opacity = 0;
+  finalMessage.style.opacity = 0;
+  restartBtn.style.display = "none";
+  restartBtn.style.opacity = 0;
+
+  if (!isRestart) yesBtn.remove();
+
+  startFloatingPhotos();
+  showMessages();
+  fadeOutBgm();
+}
+
+function showMessages() {
+  message.innerHTML = messages[msgIndex];
+  message.style.opacity = 1;
+  msgIndex++;
+
+  if (msgIndex < messages.length) {
+    setTimeout(() => {
+      message.style.opacity = 0;
+      setTimeout(showMessages, 1200);
+    }, 3000);
+  } else {
+    // メッセージ終了後
+    setTimeout(() => {
+      finalMessage.textContent = "これからも楽しく行きましょう！";
+      finalMessage.style.opacity = 1;
+
+      // 再開ボタンを右下アイコンで表示
+      restartBtn.style.display = "block";
+      setTimeout(() => restartBtn.style.opacity = 1, 200);
+    }, 1200);
+  }
+}
+
+// BGMフェードアウト
+function fadeOutBgm() {
+  let vol = bgm.volume;
+  const fade = setInterval(() => {
+    vol -= 0.02;
+    if (vol <= 0) {
+      bgm.pause();
+      clearInterval(fade);
+    }
+    bgm.volume = vol;
+  }, 200);
+}
+
+// 背景で写真を漂わせる
+function startFloatingPhotos() {
+  if (photoInterval) clearInterval(photoInterval);
+
+  photoInterval = setInterval(() => {
+    const imgSrc = images[Math.floor(Math.random() * images.length)];
+    const photo = document.createElement("img");
+    photo.src = imgSrc;
+    photo.style.position = "absolute";
+    photo.style.width = "100px";
+    photo.style.height = "70px";
+    photo.style.objectFit = "cover";
+    photo.style.borderRadius = "12px";
+    photo.style.left = Math.random() * 80 + 10 + "%";
+    photo.style.top = Math.random() * 80 + 10 + "%";
+    photo.style.opacity = 0;
+    photo.style.transition = "opacity 0.5s, transform 2s";
+    document.body.appendChild(photo);
+
+    setTimeout(() => {
+      photo.style.opacity = 0.4;
+      photo.style.transform = "translateY(-30px)";
+    }, 50);
+
+    setTimeout(() => {
+      photo.style.opacity = 0;
+      setTimeout(() => photo.remove(), 1000);
+    }, 2500);
+
+  }, 300);
+}
+</script>
+
+</body>
+</html>
